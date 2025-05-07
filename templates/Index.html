@@ -1,6 +1,52 @@
 <!DOCTYPE html>
-<head>
-<title>first webpage</title>
-</head>
-<body> body I guess </body>
 <html>
+<head>
+  <meta charset="UTF-8">
+  <title>Go Chat</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    #chat { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll; }
+    #message { width: 80%; }
+  </style>
+</head>
+<body>
+  <h1>Go Chat App</h1>
+  <div id="chat"></div>
+  <input type="text" id="message" placeholder="Type your message..." />
+  <button onclick="sendMessage()">Send</button>
+  <button onclick="leaveChat()"Leave</button>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const socket = new WebSocket("ws://localhost:8080/ws");
+
+    socket.onopen = () => {
+      appendMessage("✅ Connected to chat server");
+    };
+
+    socket.onmessage = (event) => {
+      appendMessage(event.data);
+    };
+
+    socket.onclose = () => {
+      appendMessage("❌ Disconnected from server");
+    };
+
+    function sendMessage() {
+      const input = document.getElementById("message");
+      const message = input.value;
+      if (message !== "") {
+        socket.send(message);
+        input.value = "";
+      }
+    }
+
+    function appendMessage(message) {
+      const msg = document.createElement("div");
+      msg.textContent = message;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>

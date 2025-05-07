@@ -10,12 +10,22 @@ type Hub struct{
 func (h *Hub) Run() {
 	for {
 		select {
-		case Client := <-h.Register:
-			h.Clients[Client] = true
-		case Client := <-h.Unregister:
-			h.Clients[Client] = false
-	//	case message := h.Broadcast:
-			// Loop through Clients and send message
+		case client := <-h.Register:
+			h.Clients[client] = true
+		case client := <-h.Unregister:
+			if _, ok := h.Clients[client]; ok {
+				delete(h.Clients, client)
+				close(client.Send)
+			}
+		case message := <- h.Broadcast:
+			for client := range h.Clients {
+				select {
+					case client.Send <- message:
+					default:
+						close(client.Send)
+						delete(h.Clients, client)
+				}
+			}
 		}
 	}
 }

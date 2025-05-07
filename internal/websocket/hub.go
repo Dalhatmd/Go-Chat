@@ -1,28 +1,30 @@
-package hub
+package websocket
 
 type Hub struct{
-	clients map[*Client]bool
-	register chan *Client
-	unregister chan *Client
-	broadcast chan []byte
+	Clients map[*Client]bool
+	Register chan *Client
+	Unregister chan *Client
+	Broadcast chan []byte
 }
 
 func (h *Hub) Run() {
 	for {
 		select {
-		case client := <-h.register:
-			h.clients[client] = true
+		case Client := <-h.Register:
+			h.Clients[Client] = true
+		case Client := <-h.Unregister:
+			h.Clients[Client] = false
+	//	case message := h.Broadcast:
+			// Loop through Clients and send message
 		}
-		case client := <-h.unregister:
-			h.clients[client] = false
 	}
 }
 
 func NewHub() *Hub{
 	return &Hub{
-		clients: make(map[*Client]bool),
-		register: make(chan *Client),
-		unregister: make(chan *Client),
-		broadcast: make(chan []byte),
+		Clients: make(map[*Client]bool),
+		Register: make(chan *Client),
+		Unregister: make(chan *Client),
+		Broadcast: make(chan []byte),
 	}
 }

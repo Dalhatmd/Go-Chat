@@ -2,10 +2,15 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/dalhatmd/Go-Chat/internal/websocket"
+	"github.com/dalhatmd/Go-Chat/internal/handlers"
 )
 
 
 func main() {
+	hub := websocket.NewHub()
+	go hub.Run()
+
 	router := gin.Default()
 
 	router.LoadHTMLGlob("templates/*")
@@ -15,5 +20,8 @@ func main() {
 			"title": "Homepage",
 		})
 	})
+
+	router.GET("/ws", handlers.ServeWs(hub))
+
 	router.Run(":8080")
 }
